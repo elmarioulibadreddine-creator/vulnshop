@@ -31,3 +31,24 @@ jobs:
   #  - build de l'image + scan de l'image (Trivy)
   #  - SBOM (Syft) publié comme artefact
   #  - DAST : lancer l'application puis OWASP ZAP baseline sur http://localhost:5000
+  trivy-image-scan:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    # Report non-blocking vulnerabilities
+    - |
+      echo "=== Vulnerability report: HIGH / MEDIUM / LOW ==="
+      trivy image \
+        --severity HIGH,MEDIUM,LOW \
+        --exit-code 0 \
+        "$IMAGE_NAME"
+
+    # Security gate: CRITICAL vulnerabilities block the pipeline
+    - |
+      echo "=== Security gate: CRITICAL ==="
+      trivy image \
+        --severity CRITICAL \
+        --exit-code 1 \
+        "$IMAGE_NAME"
