@@ -90,4 +90,4 @@ jobs:
             --network host \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
-            -t http://localhost:5000
+            -t http://0.0.0.0:5000
