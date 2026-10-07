@@ -64,3 +64,30 @@ jobs:
             --severity CRITICAL \
             --exit-code 1 \
             myapp:${{ github.sha }}
+  dast:
+    needs: image-security
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build image
+      - name: Build image
+        run: docker build -t myapp .
+
+      # Start application
+      - name: Start application
+        run: docker run -d --name myapp -p 5000:5000 myapp
+
+      # Wait until Flask starts
+      - name: Wait for application
+        run: sleep 5
+
+      # OWASP ZAP baseline scan
+      - name: OWASP ZAP
+        run: |
+          docker run --rm \
+            --network host \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://localhost:5000
